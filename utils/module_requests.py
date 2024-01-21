@@ -2,19 +2,21 @@ from typing import List
 from utils.settings import TOKEN
 import asyncio
 import aiohttp
+import json
 
 
 class Requests:
     """
     Класс представляющий асинхронные запросы к внешнему API
     """
-    __url = "https://api.kinopoisk.dev/v1.4/movie/"
 
-    def __init__(self, nums: List[str]) -> None:
+    def __init__(self, nums: List[str], url: str) -> None:
         """
         :param nums: список с эдпоинтами
+        :param url: url сайта кинопоиск
         """
-        self.nums = nums
+        self.__nums = nums
+        self.__url = url
 
     async def _get_info(self, num: str, session):
         """
@@ -32,10 +34,10 @@ class Requests:
         """
         async with aiohttp.ClientSession() as session:
             tasks: List[asyncio.Task] = []
-            for endpoint in self.nums:
+            for endpoint in self.__nums:
                 task = asyncio.create_task(self._get_info(num=endpoint, session=session))
                 tasks.append(task)
 
             responses = await asyncio.gather(*tasks)
-            for response in responses:
-                print(response)
+            for index, response in enumerate(responses):
+                print(f"{index + 1} результат: {json.dumps(response, indent=4)}")
